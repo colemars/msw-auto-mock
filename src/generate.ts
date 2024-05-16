@@ -81,7 +81,7 @@ function getOperationDefinitions(v3Doc: OpenAPIV3.Document): OperationDefinition
               id,
               responses: operation.responses,
             };
-          })
+          }),
   );
 }
 
@@ -99,7 +99,7 @@ function operationFilter(operation: OperationDefinition, options: CliOptions): b
 }
 
 function codeFilter(operation: OperationDefinition, options: CliOptions): OperationDefinition {
-  const codes = options?.codes?.split(',') ?? null;
+  const codes = options?.codes ? String(options?.codes).split(',') : null;
 
   const responses = Object.entries(operation.responses)
     .filter(([code]) => {
@@ -128,14 +128,17 @@ function toOperation(definition: OperationDefinition, apiGen: ApiGenerator): Ope
       return { code, id: '', responses: {} };
     }
 
-    const resolvedResponse = Object.keys(content).reduce((resolved, type) => {
-      const schema = content[type].schema;
-      if (typeof schema !== 'undefined') {
-        resolved[type] = recursiveResolveSchema(schema, apiGen);
-      }
+    const resolvedResponse = Object.keys(content).reduce(
+      (resolved, type) => {
+        const schema = content[type].schema;
+        if (typeof schema !== 'undefined') {
+          resolved[type] = recursiveResolveSchema(schema, apiGen);
+        }
 
-      return resolved;
-    }, {} as Record<string, OpenAPIV3.SchemaObject>);
+        return resolved;
+      },
+      {} as Record<string, OpenAPIV3.SchemaObject>,
+    );
 
     return {
       code,
@@ -183,16 +186,19 @@ function recursiveResolveSchema(schema: OpenAPIV3.ReferenceObject | OpenAPIV3.Sc
         if (isReference(resolvedSchema.additionalProperties)) {
           resolvedSchema.additionalProperties = recursiveResolveSchema(
             resolve(resolvedSchema.additionalProperties, apiGen),
-            apiGen
+            apiGen,
           );
         }
       }
 
       if (resolvedSchema.properties) {
-        resolvedSchema.properties = Object.entries(resolvedSchema.properties).reduce((resolved, [key, value]) => {
-          resolved[key] = recursiveResolveSchema(value, apiGen);
-          return resolved;
-        }, {} as Record<string, OpenAPIV3.SchemaObject>);
+        resolvedSchema.properties = Object.entries(resolvedSchema.properties).reduce(
+          (resolved, [key, value]) => {
+            resolved[key] = recursiveResolveSchema(value, apiGen);
+            return resolved;
+          },
+          {} as Record<string, OpenAPIV3.SchemaObject>,
+        );
       }
     } else if (resolvedSchema.allOf) {
       resolvedSchema.allOf = resolvedSchema.allOf.map(item => recursiveResolveSchema(item, apiGen));
