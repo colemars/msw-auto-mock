@@ -72,7 +72,7 @@ export function transformToHandlerCode(operationCollection: OperationCollection)
       return `http.${op.verb}(\`\${baseURL}${op.path}\`, () => {
         const localData = fetchLocalData(\`\${op.path}\`);
         if (localData) {
-          return HttpResponse.json(localData[op.verb]);
+          // return HttpResponse.json(localData[op.verb]);
         }
         
         const resultArray = [${op.response.map(response => {
