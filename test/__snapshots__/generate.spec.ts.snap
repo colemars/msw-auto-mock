@@ -13,6 +13,18 @@ import { setupWorker } from \\"msw/browser\\";
 
 faker.seed(1);
 
+const fetchLocalData = (path: string) => {
+  try {
+    const localData = JSON.parse(
+      window.localStorage.getItem(\\"localData\\") || \\"{}\\",
+    );
+    return localData[path] || null;
+  } catch (e) {
+    console.error(\\"Error fetching local data:\\", e);
+    return null;
+  }
+};
+
 const baseURL = \\"\\";
 const MAX_ARRAY_LENGTH = 20;
 
@@ -26,6 +38,11 @@ const next = () => {
 
 export const handlers = [
   http.get(\`\${baseURL}/test\`, () => {
+    const localData = fetchLocalData(\`\${op.path}\`);
+    if (localData) {
+      return res(ctx.json(localData));
+    }
+
     const resultArray = [[getGetTest200Response(), { status: 200 }]];
 
     return HttpResponse.json(...resultArray[next() % resultArray.length]);

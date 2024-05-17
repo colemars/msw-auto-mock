@@ -29,7 +29,7 @@ export function getResIdentifierName(res: ResponseMap) {
 export function transformToGenerateResultFunctions(
   operationCollection: OperationCollection,
   baseURL: string,
-  options?: CliOptions
+  options?: CliOptions,
 ): string {
   const context = {
     faker,
@@ -61,7 +61,7 @@ export function transformToGenerateResultFunctions(
             `};\n`,
           ].join('');
         })
-        .join('\n')
+        .join('\n'),
     )
     .join('\n');
 }
@@ -70,6 +70,11 @@ export function transformToHandlerCode(operationCollection: OperationCollection)
   return operationCollection
     .map(op => {
       return `http.${op.verb}(\`\${baseURL}${op.path}\`, () => {
+        const localData = fetchLocalData(\`\${op.path}\`);
+        if (localData) {
+          return res(ctx.json(localData));
+        }
+        
         const resultArray = [${op.response.map(response => {
           const identifier = getResIdentifierName(response);
           return parseInt(response?.code!) === 204
@@ -129,7 +134,7 @@ function transformJSONSchemaToFakerCode(jsonSchema?: OpenAPIV3.SchemaObject, key
     case 'object':
       if (!jsonSchema.properties && typeof jsonSchema.additionalProperties === 'object') {
         return `[...new Array(5).keys()].map(_ => ({ [faker.lorem.word()]: ${transformJSONSchemaToFakerCode(
-          jsonSchema.additionalProperties as OpenAPIV3.SchemaObject
+          jsonSchema.additionalProperties as OpenAPIV3.SchemaObject,
         )} })).reduce((acc, next) => Object.assign(acc, next), {})`;
       }
 
