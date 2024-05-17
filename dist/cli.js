@@ -477,7 +477,7 @@ function recursiveResolveSchema(schema, apiGen) {
 }
 
 // package.json
-var version = "0.18.0";
+var version = "0.18.1";
 
 // src/cli.ts
 var cli = (0, import_cac.default)();
