@@ -33,6 +33,16 @@ ${getImportsCode(options)}
 
 faker.seed(1);
 
+const fetchLocalData = (path: string) => {
+  try {
+    const localData = JSON.parse(window.localStorage.getItem('localData') || '{}');
+    return localData[path] || null;
+  } catch (e) {
+    console.error('Error fetching local data:', e);
+    return null;
+  }
+};
+
 const baseURL = '${baseURL}';
 const MAX_ARRAY_LENGTH = ${options?.maxArrayLength ?? 20};
 
