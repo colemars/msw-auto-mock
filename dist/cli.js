@@ -144,12 +144,14 @@ function transformToGenerateResultFunctions(operationCollection, baseURL, option
     result: null
   };
   import_node_vm.default.createContext(context);
+  const generatedFunctions = /* @__PURE__ */ new Set();
   return operationCollection.map(
     (op) => op.response.map((r) => {
       const name = getResIdentifierName(r);
-      if (!name) {
+      if (!name || generatedFunctions.has(name)) {
         return "";
       }
+      generatedFunctions.add(name);
       const fakerResult = transformJSONSchemaToFakerCode(r.responses?.["application/json"]);
       if (options?.static) {
         import_node_vm.default.runInContext(`result = ${fakerResult};`, context);
