@@ -39,14 +39,18 @@ export function transformToGenerateResultFunctions(
   };
   vm.createContext(context);
 
+  const generatedFunctions = new Set();
+
   return operationCollection
     .map(op =>
       op.response
         .map(r => {
           const name = getResIdentifierName(r);
-          if (!name) {
+          if (!name || generatedFunctions.has(name)) {
             return '';
           }
+
+          generatedFunctions.add(name);
 
           const fakerResult = transformJSONSchemaToFakerCode(r.responses?.['application/json']);
 
